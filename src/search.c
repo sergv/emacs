@@ -2562,7 +2562,7 @@ since only regular expressions have distinguished subexpressions.  */)
 		      substart = sub_start;
 		      subend = sub_end;
 		    }
-		  else if (c >= '1' && c <= '9')
+		  else if (c >= '0' && c <= '9')
 		    {
 		      if (c - '0' < num_regs
 			  && search_regs.start[c - '0'] >= 0)
