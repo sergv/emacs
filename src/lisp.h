@@ -2529,7 +2529,7 @@ void hash_table_rehash (Lisp_Object);
 
 /* Default size for hash tables if not specified.  */
 
-enum DEFAULT_HASH_SIZE { DEFAULT_HASH_SIZE = 65 };
+enum DEFAULT_HASH_SIZE { DEFAULT_HASH_SIZE = 19 };
 
 /* Default threshold specifying when to resize a hash table.  The
    value gives the ratio of current entries in the hash table and the
