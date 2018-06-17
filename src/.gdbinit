@@ -25,7 +25,8 @@ set $dummy = main + 8
 set $dummy = Fmake_symbol + 8
 
 # Find lwlib source files too.
-dir ../lwlib
+#dir ../lwlib
+dir /home/sergey/projects/editors/emacs/emacs/lwlib/
 #dir /gd/gnu/lesstif-0.89.9/lib/Xm
 
 # Don't enter GDB when user types C-g to quit.
