@@ -46,7 +46,15 @@
             # pkgs.dbus
             # pkgs.libselinux
             # pkgs.systemd
-            pkgs.xlibsWrapper
+            pkgs.freetype
+            # pkgs.fontconfig
+            # pkgs.xorg.xorgproto
+            # pkgs.xorg.libX11
+            # pkgs.xorg.libXt
+            # pkgs.xorg.libXft
+            # pkgs.xorg.libXext
+            # pkgs.xorg.libSM
+            # pkgs.xorg.libICE
             pkgs.xorg.libXaw
             # pkgs.xorg.Xaw3d
             pkgs.xorg.libXpm
@@ -63,6 +71,8 @@
             pkgs.gsettings-desktop-schemas
             # pkgs.webkitgtk
             # pkgs.glib-networking
+
+            pkgs.tree-sitter
           ] ++ map (x: if builtins.hasAttr "dev" x then x.dev else x) nativeDeps;
 
           # LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath nativeDeps;
