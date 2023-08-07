@@ -21,12 +21,17 @@
             pkgs.zlib
           ];
 
+          stdenv = pkgs.stdenv;
+
       in {
         devShell = pkgs.mkShell {
 
           buildInputs = nativeDeps;
 
           nativeBuildInputs = [
+            pkgs.gcc
+            pkgs.libgccjit
+
             pkgs.gdb
             pkgs.pkg-config
             pkgs.makeWrapper
@@ -74,6 +79,9 @@
 
             pkgs.tree-sitter
           ] ++ map (x: if builtins.hasAttr "dev" x then x.dev else x) nativeDeps;
+
+          LIBRARY_PATH=
+            "${pkgs.lib.makeLibraryPath [stdenv.cc.cc pkgs.glibc]}:${pkgs.lib.getLib pkgs.libgccjit}/lib/gcc/${stdenv.hostPlatform.config}/${pkgs.lib.getVersion stdenv.cc.cc}";
 
           # LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath nativeDeps;
 
