@@ -3007,8 +3007,8 @@ static dump_off
 dump_native_comp_unit (struct dump_context *ctx,
 		       struct Lisp_Native_Comp_Unit *comp_u)
 {
-  if (!CONSP (comp_u->file))
-    error ("trying to dump non fixed-up eln file");
+  // if (!CONSP (comp_u->file))
+  //   error ("trying to dump non fixed-up eln file");
 
   /* Have function documentation always lazy loaded to optimize load-time.  */
   comp_u->data_fdoc_v = Qnil;
@@ -5397,21 +5397,31 @@ dump_do_dump_relocation (const uintptr_t dump_base,
 	struct Lisp_Native_Comp_Unit *comp_u =
 	  dump_ptr (dump_base, reloc_offset);
 	comp_u->lambda_gc_guard_h = CALLN (Fmake_hash_table, QCtest, Qeq);
-	if (STRINGP (comp_u->file))
-	  error ("trying to load incoherent dumped eln file %s",
+	bool is_string = STRINGP (comp_u->file);
+	bool is_cons = CONSP (comp_u->file);
+	if (!(is_string || is_cons))
+	  error ("Trying to load incoherent dumped eln file %s",
 		 SSDATA (comp_u->file));
 
-	if (!CONSP (comp_u->file))
-	  error ("incoherent compilation unit for dump was dumped");
+	// if (!CONSP (comp_u->file))
+	//   error ("incoherent compilation unit for dump was dumped");
 
 	/* emacs_execdir is always unibyte, but the file names in
 	   comp_u->file could be multibyte, so we need to encode
 	   them.  */
+	Lisp_Object eln_fname;
+	char *fndata;
+
+	if (is_string)
+	  {
+	    eln_fname = comp_u->file;
+	  }
+	else
+	  {
+
 	Lisp_Object cu_file1 = ENCODE_FILE (XCAR (comp_u->file));
 	Lisp_Object cu_file2 = ENCODE_FILE (XCDR (comp_u->file));
 	ptrdiff_t fn1_len = SBYTES (cu_file1), fn2_len = SBYTES (cu_file2);
-	Lisp_Object eln_fname;
-	char *fndata;
 
 	/* Check just once if this is a local build or Emacs was installed.  */
 	/* Can't use expand-file-name here, because we are too early
@@ -5444,6 +5454,8 @@ dump_do_dump_relocation (const uintptr_t dump_base,
 	    fndata = SSDATA (eln_fname);
 	    memcpy (fndata, emacs_execdir, execdir_len);
 	    memcpy (fndata + execdir_len, SSDATA (cu_file), fn_len);
+	  }
+
 	  }
 
 	/* FIXME: This records the names of the *.eln files in an
