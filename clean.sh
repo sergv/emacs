@@ -10,6 +10,7 @@ set -u
 # propagate errors from all parts of pipes
 set -o pipefail
 
+# clean *EVERYONE*
 make extraclean
 # find . -name '*.elc' -delete
 # rm lisp/loaddefs.el
