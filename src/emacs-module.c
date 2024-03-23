@@ -268,8 +268,6 @@ module_decode_utf_8 (const char *str, ptrdiff_t len)
 /* TODO: Make backtraces work if this macro is used.  */
 
 #define MODULE_HANDLE_NONLOCAL_EXIT(retval)                             \
-  if (module_non_local_exit_check (env) != emacs_funcall_exit_return)	\
-    return retval;							\
   struct handler *internal_handler =                                    \
     push_handler_nosignal (Qt, CATCHER_ALL);                            \
   if (!internal_handler)                                                \
@@ -330,8 +328,6 @@ module_decode_utf_8 (const char *str, ptrdiff_t len)
 
 #define MODULE_FUNCTION_BEGIN_NO_CATCH(error_retval)                    \
   do {                                                                  \
-    module_assert_thread ();                                            \
-    module_assert_env (env);                                            \
     if (module_non_local_exit_check (env) != emacs_funcall_exit_return) \
       return error_retval;                                              \
   } while (false)
@@ -519,8 +515,6 @@ static void
 module_non_local_exit_signal (emacs_env *env,
                               emacs_value symbol, emacs_value data)
 {
-  module_assert_thread ();
-  module_assert_env (env);
   if (module_non_local_exit_check (env) == emacs_funcall_exit_return)
     module_non_local_exit_signal_1 (env, value_to_lisp (symbol),
 				    value_to_lisp (data));
@@ -529,8 +523,6 @@ module_non_local_exit_signal (emacs_env *env,
 static void
 module_non_local_exit_throw (emacs_env *env, emacs_value tag, emacs_value value)
 {
-  module_assert_thread ();
-  module_assert_env (env);
   if (module_non_local_exit_check (env) == emacs_funcall_exit_return)
     module_non_local_exit_throw_1 (env, value_to_lisp (tag),
 				   value_to_lisp (value));
