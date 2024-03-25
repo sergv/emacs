@@ -121,11 +121,11 @@ struct Lisp_TS_Node
 
 /* A compiled tree-sitter query.
 
-   When we create a query object by treesit-compile-query, it is not
+   When we create a query object by treesit-query-compile, it is not
    immediately compiled, because that would require the language
    definition to be loaded.  For example, python.el contains
 
-   (defvar xxx (treesit-compile-query ...))
+   (defvar xxx (treesit-query-compile ...))
 
    and (require 'python.el) requires python's language definition to
    be available.  In the case of python.el, Emacs requires it when
