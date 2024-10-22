@@ -1965,9 +1965,11 @@ Elements of ALIST that are not conses are ignored.  */)
   (Lisp_Object key, Lisp_Object alist)
 {
   Lisp_Object tail = alist;
-  FOR_EACH_TAIL (tail)
-    if (CONSP (XCAR (tail)) && EQ (XCAR (XCAR (tail)), key))
-      return XCAR (tail);
+  FOR_EACH_TAIL (tail) {
+    Lisp_Object car = XCAR (tail);
+    if (CONSP (car) && EQ (XCAR (car), key))
+      return car;
+  }
   CHECK_LIST_END (tail, alist);
   return Qnil;
 }
@@ -1978,9 +1980,11 @@ Elements of ALIST that are not conses are ignored.  */)
 Lisp_Object
 assq_no_quit (Lisp_Object key, Lisp_Object alist)
 {
-  for (; ! NILP (alist); alist = XCDR (alist))
-    if (CONSP (XCAR (alist)) && EQ (XCAR (XCAR (alist)), key))
-      return XCAR (alist);
+  for (; ! NILP (alist); alist = XCDR (alist)) {
+    Lisp_Object car = XCAR (alist);
+    if (CONSP (car) && EQ (XCAR (car), key))
+      return car;
+  }
   return Qnil;
 }
 
@@ -1992,9 +1996,11 @@ Lisp_Object
 assq_no_signal (Lisp_Object key, Lisp_Object alist)
 {
   Lisp_Object tail = alist;
-  FOR_EACH_TAIL_SAFE (tail)
-    if (CONSP (XCAR (tail)) && EQ (XCAR (XCAR (tail)), key))
-      return XCAR (tail);
+  FOR_EACH_TAIL_SAFE (tail) {
+    Lisp_Object car = XCAR (tail);
+    if (CONSP (car) && EQ (XCAR (car), key))
+      return car;
+  }
   return Qnil;
 }
 
@@ -2014,10 +2020,11 @@ TESTFN is called with 2 arguments: a car of an alist element and KEY.  */)
       Lisp_Object car = XCAR (tail);
       if (!CONSP (car))
 	continue;
+
+      Lisp_Object car2 = XCAR (car);
       if ((NILP (testfn)
-	   ? (EQ (XCAR (car), key) || !NILP (Fequal
-					     (XCAR (car), key)))
-	   : !NILP (calln (testfn, XCAR (car), key))))
+	   ? (EQ (car2, key) || !NILP (Fequal (car2, key)))
+	   : !NILP (calln (testfn, car2, key))))
 	return car;
     }
   CHECK_LIST_END (tail, alist);
@@ -2034,9 +2041,11 @@ assoc_no_quit (Lisp_Object key, Lisp_Object alist)
   for (; ! NILP (alist); alist = XCDR (alist))
     {
       Lisp_Object car = XCAR (alist);
-      if (CONSP (car)
-	  && (EQ (XCAR (car), key) || equal_no_quit (XCAR (car), key)))
-	return car;
+      if (CONSP (car)) {
+	Lisp_Object car2 = XCAR (car);
+	if ((EQ (car2, key) || equal_no_quit (car2, key)))
+	  return car;
+      }
     }
   return Qnil;
 }
@@ -2047,9 +2056,11 @@ The value is actually the first element of ALIST whose cdr is KEY.  */)
   (Lisp_Object key, Lisp_Object alist)
 {
   Lisp_Object tail = alist;
-  FOR_EACH_TAIL (tail)
-    if (CONSP (XCAR (tail)) && EQ (XCDR (XCAR (tail)), key))
-      return XCAR (tail);
+  FOR_EACH_TAIL (tail) {
+    Lisp_Object car = XCAR (tail);
+    if (CONSP (car) && EQ (XCDR (car), key))
+      return car;
+  }
   CHECK_LIST_END (tail, alist);
   return Qnil;
 }
@@ -2065,9 +2076,11 @@ The value is actually the first element of ALIST whose cdr equals KEY.  */)
   FOR_EACH_TAIL (tail)
     {
       Lisp_Object car = XCAR (tail);
-      if (CONSP (car)
-	  && (EQ (XCDR (car), key) || !NILP (Fequal (XCDR (car), key))))
-	return car;
+      if (CONSP (car)) {
+	Lisp_Object tmp = XCDR (car);
+	if (EQ (tmp, key) || !NILP (Fequal (tmp, key)))
+	  return car;
+      }
     }
   CHECK_LIST_END (tail, alist);
   return Qnil;
@@ -2619,11 +2632,12 @@ This function doesn't signal an error if PLIST is invalid.  */)
   Lisp_Object tail = plist;
   FOR_EACH_TAIL_SAFE (tail)
     {
-      if (! CONSP (XCDR (tail)))
+      Lisp_Object cdr = XCDR (tail);
+      if (! CONSP (cdr))
 	break;
       if (!NILP (calln (predicate, XCAR (tail), prop)))
-	return XCAR (XCDR (tail));
-      tail = XCDR (tail);
+	return XCAR (cdr);
+      tail = cdr;
     }
 
   return Qnil;
@@ -2636,11 +2650,12 @@ plist_get (Lisp_Object plist, Lisp_Object prop)
   Lisp_Object tail = plist;
   FOR_EACH_TAIL_SAFE (tail)
     {
-      if (! CONSP (XCDR (tail)))
+      Lisp_Object cdr = XCDR (tail);
+      if (! CONSP (cdr))
 	break;
       if (EQ (XCAR (tail), prop))
-	return XCAR (XCDR (tail));
-      tail = XCDR (tail);
+	return XCAR (cdr);
+      tail = cdr;
     }
   return Qnil;
 }
@@ -2677,17 +2692,18 @@ The PLIST is modified by side effects.  */)
   Lisp_Object prev = Qnil, tail = plist;
   FOR_EACH_TAIL (tail)
     {
-      if (! CONSP (XCDR (tail)))
+      Lisp_Object cdr = XCDR (tail);
+      if (! CONSP (cdr))
 	break;
 
       if (!NILP (calln (predicate, XCAR (tail), prop)))
 	{
-	  Fsetcar (XCDR (tail), val);
+	  Fsetcar (cdr, val);
 	  return plist;
 	}
 
       prev = tail;
-      tail = XCDR (tail);
+      tail = cdr;
     }
   CHECK_TYPE (NILP (tail), Qplistp, plist);
   Lisp_Object newcell
@@ -2705,17 +2721,19 @@ plist_put (Lisp_Object plist, Lisp_Object prop, Lisp_Object val)
   Lisp_Object prev = Qnil, tail = plist;
   FOR_EACH_TAIL (tail)
     {
-      if (! CONSP (XCDR (tail)))
+      Lisp_Object cdr = XCDR (tail);
+
+      if (! CONSP (cdr))
 	break;
 
       if (EQ (XCAR (tail), prop))
 	{
-	  Fsetcar (XCDR (tail), val);
+	  Fsetcar (cdr, val);
 	  return plist;
 	}
 
       prev = tail;
-      tail = XCDR (tail);
+      tail = cdr;
     }
   CHECK_TYPE (NILP (tail), Qplistp, plist);
   Lisp_Object newcell
