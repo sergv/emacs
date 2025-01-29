@@ -491,7 +491,23 @@ hbfont_shape (Lisp_Object lgstring, Lisp_Object direction)
   if (!hb_font)
     return make_fixnum (0);
 
-  hb_bool_t success = hb_shape_full (hb_font, hb_buffer, NULL, 0, NULL);
+  hb_feature_t features[] = {
+    {
+      .tag   = HB_TAG('T', 'X', 'T', 'R'),
+      .value = 1,
+      .start = HB_FEATURE_GLOBAL_START,
+      .end   = HB_FEATURE_GLOBAL_END
+    },
+    // Too annoying
+    {
+      .tag   = HB_TAG('c', 'a', 'l', 't'),
+      .value = 0,
+      .start = HB_FEATURE_GLOBAL_START,
+      .end   = HB_FEATURE_GLOBAL_END
+    }
+  };
+
+  hb_bool_t success = hb_shape_full (hb_font, hb_buffer, features, sizeof(features) / sizeof(features[0]), NULL);
   if (font->driver->end_hb_font)
     font->driver->end_hb_font (font, hb_font);
   if (!success)
