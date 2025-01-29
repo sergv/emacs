@@ -76,7 +76,7 @@ export NATIVE_FULL_AOT="$native_comp"
        --without-gpm \
        --with-libsystemd \
        --with-dbus \
-       --with-gnutls \
+       --without-gnutls \
        --with-zlib \
        --enable-silent-rules \
        --with-pdumper=yes \
