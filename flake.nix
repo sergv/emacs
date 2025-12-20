@@ -37,7 +37,7 @@
             pkgs.makeWrapper
             pkgs.autoreconfHook
             pkgs.texinfo
-            pkgs.wrapGAppsHook
+            pkgs.wrapGAppsHook3
             pkgs.ncurses
             # pkgs.gconf
             pkgs.libxml2
