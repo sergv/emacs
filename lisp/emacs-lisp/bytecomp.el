@@ -5967,7 +5967,7 @@ and corresponding effects."
           form args
           '(:name
             :buffer :command :coding :noquery :stop :connection-type
-            :filter :sentinel :stderr :file-handler)
+            :filter :sentinel :stderr :file-handler :width :height)
           '(:name :command))))
 
 (put 'make-pipe-process 'compiler-macro
