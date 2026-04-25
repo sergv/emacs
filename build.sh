@@ -84,7 +84,6 @@ export NATIVE_FULL_AOT="$native_comp"
        --with-dumping=pdumper \
        --with-cairo \
        --with-harfbuzz \
-       --with-json \
        --with-libgmp \
        --with-native-compilation=no \
        --with-tree-sitter
