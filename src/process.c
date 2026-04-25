@@ -265,7 +265,7 @@ static int process_output_delay_count;
 static bool process_output_skip;
 
 static void start_process_unwind (Lisp_Object);
-static void create_process (Lisp_Object, char **, Lisp_Object);
+static void create_process (Lisp_Object, char **, Lisp_Object, bool, int, int);
 #if defined (USABLE_SIGIO) || defined (USABLE_SIGPOLL)
 static bool keyboard_bit_set (fd_set *);
 #endif
@@ -1823,6 +1823,9 @@ for a file name handler for the current buffer's `default-directory'
 and invoke that file name handler to make the process.  If there is no
 such handler, proceed as if FILE-HANDLER were nil.
 
+:width INT, :height INT -- set width and height for the underlying pty,
+must specify both to have an effect.
+
 usage: (make-process &rest ARGS)  */)
   (ptrdiff_t nargs, Lisp_Object *args)
 {
@@ -1918,6 +1921,12 @@ usage: (make-process &rest ARGS)  */)
       XPROCESS (proc)->pty_in = XPROCESS (proc)->pty_out =
 	is_pty_from_symbol (tem);
     }
+
+  Lisp_Object height = plist_get (contact, QCheight);
+  Lisp_Object width = plist_get (contact, QCwidth);
+  bool have_size = FIXNUMP (height) && FIXNUMP (width);
+  int h = have_size ? XFIXNUM_RAW (height) : 0;
+  int w = have_size ? XFIXNUM_RAW (width) : 0;
 
   if (!NILP (stderrproc))
     pset_stderrproc (XPROCESS (proc), stderrproc);
@@ -2087,7 +2096,7 @@ usage: (make-process &rest ARGS)  */)
 	  tem = XCDR (tem);
 	}
 
-      create_process (proc, new_argv, current_dir);
+      create_process (proc, new_argv, current_dir, have_size, h, w);
     }
   else
     create_pty (proc);
@@ -2157,7 +2166,7 @@ enum
 static_assert (PROCESS_OPEN_FDS == EXEC_MONITOR_OUTPUT + 1);
 
 static void
-create_process (Lisp_Object process, char **new_argv, Lisp_Object current_dir)
+create_process (Lisp_Object process, char **new_argv, Lisp_Object current_dir, bool have_size, int h, int w)
 {
   struct Lisp_Process *p = XPROCESS (process);
   int inchannel = -1, outchannel = -1;
@@ -2198,6 +2207,10 @@ create_process (Lisp_Object process, char **new_argv, Lisp_Object current_dir)
     {
       p->open_fd[SUBPROCESS_STDIN] = forkin = pty_tty;
       outchannel = ptychannel;
+      if (have_size)
+        {
+          set_window_size (outchannel, h, w);
+        }
     }
   else
     {
@@ -2212,6 +2225,10 @@ create_process (Lisp_Object process, char **new_argv, Lisp_Object current_dir)
     {
       forkout = pty_tty;
       p->open_fd[READ_FROM_SUBPROCESS] = inchannel = ptychannel;
+      if (have_size)
+        {
+          set_window_size (inchannel, h, w);
+        }
     }
   else
     {
@@ -8862,6 +8879,8 @@ syms_of_process (void)
   DEFSYM (QCstderr, ":stderr");
   DEFSYM (Qpty, "pty");
   DEFSYM (Qpipe, "pipe");
+  DEFSYM (QCwidth, ":width");
+  DEFSYM (QCheight, ":height");
 
   DEFSYM (Qlast_nonmenu_event, "last-nonmenu-event");
 
