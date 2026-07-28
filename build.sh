@@ -46,6 +46,10 @@ native_comp="0"
 
 export NATIVE_FULL_AOT="$native_comp"
 
+if [[ ! -e configure ]]; then
+    ./autogen.sh
+fi
+
 ./configure \
        --prefix="/home/sergey/projects/emacs/installed/local-30.0-candidate/" \
        --with-gconf \
