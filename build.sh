@@ -103,7 +103,25 @@ fi
 # make NATIVE_FULL_AOT="$native_comp" -j4
 # make NATIVE_FULL_AOT="$native_comp" install
 
-make -j12
+
+jobs="1"
+if [[ -v NIX_BUILD_CORES ]]; then
+    jobs="$NIX_BUILD_CORES"
+else
+    cores="$(getconf _NPROCESSORS_ONLN)"
+    if [[ "$OSTYPE" == "linux-gnu" ]] && command -v lscpu >/dev/null 2>&1; then
+        threads_per_core=$(lscpu | awk '/^ *Thread\(s\) per core:/ { print $NF; }')
+        jobs=$(( "$cores" / "$threads_per_core" ))
+        # jobs=$(lscpu | awk 'BEGIN { cores = 0; threads = 0; } /^ *CPU\(s\):/ { cores = $NF; } /^ *Thread\(s\) per core:/ { threads = $NF; } END { print (cores / threads); }')
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        jobs="$cores"
+        # jobs=$(sysctl machdep.cpu.core_count | cut -w -f2)
+    elif [[ -e /proc/cpuinfo ]]; then
+        jobs="$(awk '/processor/' /proc/cpuinfo | wc -l)"
+    fi
+fi
+
+make "-j$jobs"
 make install
 
 #        --without-native-compilation
