@@ -46,7 +46,7 @@
             pkgs.acl
             pkgs.gpm
             pkgs.gettext
-            pkgs.jansson
+            # pkgs.jansson
             pkgs.harfbuzz.dev
             # pkgs.dbus
             # pkgs.libselinux
