@@ -606,7 +606,7 @@ directory got moved.  This is set to be a pair in the form of:
                    (equal dump-mode "pdump"))
           ;; Don't enable this before bootstrap is completed, as the
           ;; compiler infrastructure may not be usable yet.
-          (setq native-comp-enable-subr-trampolines t))
+          (setq native-comp-enable-subr-trampolines nil))
         (message "Dumping under the name %s" output)
         (condition-case ()
             (delete-file output)
