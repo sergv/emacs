@@ -5489,19 +5489,6 @@ This gets called by late_top_level_run during the load phase.  */)
   return Qnil;
 }
 
-static bool
-file_in_eln_sys_dir (Lisp_Object filename)
-{
-  Lisp_Object eln_sys_dir = Qnil;
-  Lisp_Object tmp = Vnative_comp_eln_load_path;
-  FOR_EACH_TAIL (tmp)
-    eln_sys_dir = XCAR (tmp);
-  return !NILP (Fstring_match (Fregexp_quote (Fexpand_file_name (eln_sys_dir,
-								 Qnil)),
-			       Fexpand_file_name (filename, Qnil),
-			       Qnil, Qnil));
-}
-
 /* Load related routines.  */
 DEFUN ("native-elisp-load", Fnative_elisp_load, Snative_elisp_load, 1, 2, 0,
        doc: /* Load native elisp code FILENAME.
@@ -5515,27 +5502,7 @@ LATE-LOAD has to be non-nil when loading for deferred compilation.  */)
   struct Lisp_Native_Comp_Unit *comp_u = allocate_native_comp_unit ();
   Lisp_Object encoded_filename = ENCODE_FILE (filename);
 
-  if (!NILP (Fgethash (filename, Vcomp_loaded_comp_units_h, Qnil))
-      && !file_in_eln_sys_dir (filename)
-      && !NILP (Ffile_writable_p (filename)))
-    {
-      /* If in this session there was ever a file loaded with this
-	 name, rename it before loading, to make sure we always get a
-	 new handle!  */
-      Lisp_Object tmp_filename =
-	Fmake_temp_file_internal (filename, Qnil, build_string (".eln.tmp"),
-				  Qnil);
-      if (NILP (Ffile_writable_p (tmp_filename)))
-	comp_u->handle = dynlib_open_for_eln (SSDATA (encoded_filename));
-      else
-	{
-	  Frename_file (filename, tmp_filename, Qt);
-	  comp_u->handle = dynlib_open_for_eln (SSDATA (ENCODE_FILE (tmp_filename)));
-	  Frename_file (tmp_filename, filename, Qnil);
-	}
-    }
-  else
-    comp_u->handle = dynlib_open_for_eln (SSDATA (encoded_filename));
+  comp_u->handle = dynlib_open_for_eln (SSDATA (encoded_filename));
 
   if (!comp_u->handle)
     xsignal2 (Qnative_lisp_load_failed, filename,
