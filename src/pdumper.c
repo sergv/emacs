@@ -2245,8 +2245,8 @@ dump_treesit_compiled_query (struct dump_context *ctx,
 			     struct Lisp_TS_Query *query)
 {
   START_DUMP_PVEC (ctx, &query->header, struct Lisp_TS_Query, out);
-  dump_field_lv (ctx, &out->language, query, &query->language, WEIGHT_STRONG);
-  dump_field_lv (ctx, &out->source, query, &query->source, WEIGHT_STRONG);
+  dump_field_lv (ctx, out, query, &query->language, WEIGHT_STRONG);
+  dump_field_lv (ctx, out, query, &query->source, WEIGHT_STRONG);
   /* These will be recompiled after load from dump.  */
   out->query = NULL;
   out->cursor = NULL;
