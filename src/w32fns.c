@@ -11551,6 +11551,7 @@ frame_parm_handler w32_frame_parm_handlers[] =
   w32_set_tool_bar_position,
   w32_set_inhibit_double_buffering,
   w32_set_undecorated,
+  NULL,
   w32_set_parent_frame,
   w32_set_skip_taskbar,
   w32_set_no_focus_on_map,

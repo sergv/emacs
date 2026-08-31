@@ -10224,6 +10224,7 @@ frame_parm_handler x_frame_parm_handlers[] =
   NULL,
 #endif
   x_set_undecorated,
+  NULL,
   x_set_parent_frame,
   x_set_skip_taskbar,
   x_set_no_focus_on_map,

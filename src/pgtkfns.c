@@ -1003,6 +1003,7 @@ frame_parm_handler pgtk_frame_parm_handlers[] =
     pgtk_set_tool_bar_position,
     0,
     pgtk_set_undecorated,
+    NULL,
     pgtk_set_parent_frame,
     pgtk_set_skip_taskbar,
     pgtk_set_no_focus_on_map,

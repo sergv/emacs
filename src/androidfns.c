@@ -3182,6 +3182,7 @@ frame_parm_handler android_frame_parm_handlers[] =
   android_set_tool_bar_position,
   NULL,
   NULL,
+  NULL,
   android_set_parent_frame,
   NULL,
   android_set_no_focus_on_map,

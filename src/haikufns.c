@@ -3189,6 +3189,7 @@ frame_parm_handler haiku_frame_parm_handlers[] =
     haiku_set_tool_bar_position,
     haiku_set_inhibit_double_buffering,
     haiku_set_undecorated,
+    NULL,
     haiku_set_parent_frame,
     NULL, /* set skip taskbar */
     haiku_set_no_focus_on_map,

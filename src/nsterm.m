@@ -1996,6 +1996,55 @@ ns_set_undecorated (struct frame *f, Lisp_Object new_value, Lisp_Object old_valu
 }
 
 void
+ns_set_undecorated_round (struct frame *f, Lisp_Object new_value, Lisp_Object old_value)
+/* --------------------------------------------------------------------------
+     Set frame F's `undecorated_round' parameter.  If non-nil, F's window-system
+     window is drawn without decorations, title, minimize/maximize boxes
+     and external borders.  This usually means that the window cannot be
+     dragged, resized, iconified, maximized or deleted with the mouse.  If
+     nil, draw the frame with all the elements listed above unless these
+     have been suspended via window manager settings.
+   -------------------------------------------------------------------------- */
+{
+  NSTRACE ("ns_set_undecorated_round");
+
+  if (!EQ (new_value, old_value))
+    {
+      EmacsView *view = (EmacsView *)FRAME_NS_VIEW (f);
+      NSWindow *oldWindow = [view window];
+      NSWindow *newWindow;
+
+      block_input ();
+
+      FRAME_UNDECORATED_ROUND (f) = !NILP (new_value);
+
+      newWindow = [[EmacsWindow alloc] initWithEmacsFrame:f];
+
+      /* initWithEmacsFrame: builds the new window at the default size derived
+         from the frame's columns and rows, not at the current window size.
+         The EmacsView is reused, so its fullscreen state (fs_state) carries
+         over to the new window.  Copy the old window's frame here; otherwise a
+         frame that was maximized or resized before `undecorated-round' was
+         toggled comes back at the default size while fs_state still reports it
+         as, say, FULLSCREEN_MAXIMIZED.  The window would then look
+         un-maximized until a later fullscreen or zoom action applied the real
+         geometry.  */
+      [newWindow setFrame:[oldWindow frame] display:NO];
+
+      if ([oldWindow isKeyWindow])
+        [newWindow makeKeyAndOrderFront:NSApp];
+
+      [newWindow setIsVisible:[oldWindow isVisible]];
+      if ([oldWindow isMiniaturized])
+        [newWindow miniaturize:NSApp];
+
+      [oldWindow close];
+
+      unblock_input ();
+    }
+}
+
+void
 ns_set_parent_frame (struct frame *f, Lisp_Object new_value, Lisp_Object old_value)
 /* --------------------------------------------------------------------------
      Set frame F's `parent-frame' parameter.  If non-nil, make F a child
@@ -9767,6 +9816,11 @@ static void cancel_ns_deferred_UAZoomChangeFocus_timer ()
 		 | NSWindowStyleMaskMiniaturizable
 		 | NSWindowStyleMaskClosable);
 
+  if (FRAME_UNDECORATED_ROUND (f))
+    {
+      styleMask |= NSFullSizeContentViewWindowMask;
+    }
+
   last_drag_event = nil;
 
   width = FRAME_TEXT_COLS_TO_PIXEL_WIDTH (f, f->text_cols);
@@ -9850,13 +9904,22 @@ static void cancel_ns_deferred_UAZoomChangeFocus_timer ()
 #endif
     }
 
+  if (FRAME_UNDECORATED_ROUND (f))
+    {
+      [self setTitlebarAppearsTransparent:YES];
+      [self setTitleVisibility:NSWindowTitleHidden];
+      [[self standardWindowButton:NSWindowCloseButton] setHidden:YES];
+      [[self standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
+      [[self standardWindowButton:NSWindowZoomButton] setHidden:YES];
+    }
+
   return self;
 }
 
 
 - (void)createToolbar: (struct frame *)f
 {
-  if (FRAME_UNDECORATED (f)
+  if (FRAME_UNDECORATED (f) || FRAME_UNDECORATED_ROUND (f)
       || [self styleMask] == NSWindowStyleMaskBorderless
       || !FRAME_EXTERNAL_TOOL_BAR (f)
       || [self toolbar] != nil)
