@@ -2952,8 +2952,7 @@ binding."
   (declare (indent 2)
            (debug ([&or (symbolp form)  ; must be first, Bug#48489
                         (&rest [&or symbolp (symbolp form) (form)])]
-                   body))
-           (obsolete if-let* "31.1"))
+                   body)))
   (when (and (<= (length spec) 2)
              (not (listp (car spec))))
     ;; Adjust the single binding case
@@ -2967,8 +2966,7 @@ If all are non-nil, evaluate the forms in BODY
 and return the value of the last form.
 
 The variable list SPEC is the same as in `if-let'."
-  (declare (indent 1) (debug if-let)
-           (obsolete "use `when-let*' or `and-let*' instead." "31.1"))
+  (declare (indent 1) (debug if-let))
   ;; Previously we expanded to `if-let', and then required a
   ;; `with-suppressed-warnings' to avoid doubling up the obsoletion
   ;; warnings.  But that triggers a bytecompiler bug; see bug#74530.
