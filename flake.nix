@@ -1,17 +1,20 @@
 {
   inputs = {
     nixpkgs = {
-      url = "nixpkgs";
-    };
-    flake-utils = {
-      url = "github:numtide/flake-utils";
+      url = "flake:nixpkgs";
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = nixpkgs.legacyPackages.${system};
-          # name = "linux-scripts";
+  outputs = { self, nixpkgs }:
+    let
+      systems = ["x86_64-linux" "i686-linux" "aarch64-linux" "aarch64-darwin"];
+      forEachSystem = nixpkgs.lib.genAttrs systems;
+    in
+    {
+      devShells = forEachSystem (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages."${system}";
 
           nativeDeps = [
             # pkgs.gtk3
@@ -22,80 +25,82 @@
           ];
 
           stdenv = pkgs.stdenv;
+        in
+        {
+          default =
+            pkgs.mkShell {
+              buildInputs = nativeDeps;
 
-      in {
-        devShells.default = pkgs.mkShell {
+              nativeBuildInputs = [
+                pkgs.gcc
+                pkgs.libgccjit
 
-          buildInputs = nativeDeps;
+                pkgs.gdb
+                pkgs.pkg-config
+                pkgs.makeWrapper
+                pkgs.autoreconfHook
+                pkgs.texinfo
+                pkgs.wrapGAppsHook3
+                pkgs.ncurses
+                # pkgs.gconf
+                pkgs.libxml2
+                pkgs.gnutls
+                pkgs.alsa-lib
+                pkgs.acl
+                pkgs.gpm
+                pkgs.gettext
+                # pkgs.jansson
+                pkgs.harfbuzz.dev
+                # pkgs.dbus
+                # pkgs.libselinux
+                # pkgs.systemd
+                pkgs.freetype
+                # pkgs.fontconfig
+                # pkgs.xorg.xorgproto
+                # pkgs.xorg.libX11
+                # pkgs.xorg.libXt
+                # pkgs.xorg.libXft
+                # pkgs.xorg.libXext
+                # pkgs.xorg.libSM
+                # pkgs.xorg.libICE
+                pkgs.xorg.libXaw
+                # pkgs.xorg.Xaw3d
+                pkgs.xorg.libXpm
+                pkgs.libpng
+                pkgs.libjpeg
+                # pkgs.giflib
+                # pkgs.libtiff
+                pkgs.xorg.libXft
+                # pkgs.gconf
+                pkgs.cairo
+                pkgs.librsvg
+                pkgs.libotf
+                pkgs.gtk3-x11
+                pkgs.gsettings-desktop-schemas
+                # pkgs.webkitgtk
+                # pkgs.glib-networking
 
-          nativeBuildInputs = [
-            pkgs.gcc
-            pkgs.libgccjit
+                pkgs.tree-sitter
+              ] ++ map (x: if builtins.hasAttr "dev" x then x.dev else x) nativeDeps;
 
-            pkgs.gdb
-            pkgs.pkg-config
-            pkgs.makeWrapper
-            pkgs.autoreconfHook
-            pkgs.texinfo
-            pkgs.wrapGAppsHook3
-            pkgs.ncurses
-            # pkgs.gconf
-            pkgs.libxml2
-            pkgs.gnutls
-            pkgs.alsa-lib
-            pkgs.acl
-            pkgs.gpm
-            pkgs.gettext
-            # pkgs.jansson
-            pkgs.harfbuzz.dev
-            # pkgs.dbus
-            # pkgs.libselinux
-            # pkgs.systemd
-            pkgs.freetype
-            # pkgs.fontconfig
-            # pkgs.xorg.xorgproto
-            # pkgs.xorg.libX11
-            # pkgs.xorg.libXt
-            # pkgs.xorg.libXft
-            # pkgs.xorg.libXext
-            # pkgs.xorg.libSM
-            # pkgs.xorg.libICE
-            pkgs.xorg.libXaw
-            # pkgs.xorg.Xaw3d
-            pkgs.xorg.libXpm
-            pkgs.libpng
-            pkgs.libjpeg
-            # pkgs.giflib
-            # pkgs.libtiff
-            pkgs.xorg.libXft
-            # pkgs.gconf
-            pkgs.cairo
-            pkgs.librsvg
-            pkgs.libotf
-            pkgs.gtk3-x11
-            pkgs.gsettings-desktop-schemas
-            # pkgs.webkitgtk
-            # pkgs.glib-networking
+              LIBRARY_PATH=
+                "${pkgs.lib.makeLibraryPath [stdenv.cc.cc pkgs.glibc]}:${pkgs.lib.getLib pkgs.libgccjit}/lib/gcc/${stdenv.hostPlatform.config}/${pkgs.lib.getVersion stdenv.cc.cc}";
 
-            pkgs.tree-sitter
-          ] ++ map (x: if builtins.hasAttr "dev" x then x.dev else x) nativeDeps;
+              # LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath nativeDeps;
 
-          LIBRARY_PATH=
-            "${pkgs.lib.makeLibraryPath [stdenv.cc.cc pkgs.glibc]}:${pkgs.lib.getLib pkgs.libgccjit}/lib/gcc/${stdenv.hostPlatform.config}/${pkgs.lib.getVersion stdenv.cc.cc}";
+              # # Add executable packages to the nix-shell environment.
+              # packages = [
+              #   # hpkgs.ghc
+              #   # hpkgs.cabal-install
+              #   pkgs.zlib
+              # ];
 
-          # LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath nativeDeps;
+              # Add build dependencies of the listed derivations to the nix-shell environment.
+              # inputsFrom = [ pkgs.hello pkgs.gnutar ];
 
-          # # Add executable packages to the nix-shell environment.
-          # packages = [
-          #   # hpkgs.ghc
-          #   # hpkgs.cabal-install
-          #   pkgs.zlib
-          # ];
-
-          # Add build dependencies of the listed derivations to the nix-shell environment.
-          # inputsFrom = [ pkgs.hello pkgs.gnutar ];
-
-          # ... - everything mkDerivation has
-        };
-      });
+              # ... - everything mkDerivation has
+            };
+        }
+      );
+    };
 }
