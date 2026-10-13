@@ -12,8 +12,10 @@ set -e
 
 # plain conf
 # export CC=clang
+
+# \ -mtune=native\ -march=native
 export CC=gcc
-export CFLAGS=-O2\ -m64\ -g3\ -mtune=native\ -march=native\ -fno-omit-frame-pointer
+export CFLAGS=-O2\ -m64\ -g3\ -fno-omit-frame-pointer
 
 # export CFLAGS=-O2\ -mtune=native\ -march=native\ -fno-omit-frame-pointer\ -m64\ -g
 
@@ -49,9 +51,16 @@ export NATIVE_FULL_AOT="$native_comp"
 if [[ ! -e configure ]]; then
     ./autogen.sh
 fi
+# --with-x-toolkit=gtk3 \
 
-./configure \
-       --prefix="/home/sergey/projects/emacs/installed/local-30.0-candidate/" \
+root=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+
+mkdir -p /tmp/tmp/emacs-build
+
+cd /tmp/tmp/emacs-build
+
+"$root/configure" \
+       --prefix="/tmp/tmp/local-31.0-candidate/" \
        --with-gconf \
        --with-gsettings \
        --without-imagemagick \
@@ -72,7 +81,7 @@ fi
        --with-xft \
        --with-libotf \
        --disable-link-time-optimization \
-       --with-x-toolkit=gtk3 \
+       --with-x-toolkit=lucid \
        --without-toolkit-scroll-bars \
        --with-threads \
        --without-xwidgets \
